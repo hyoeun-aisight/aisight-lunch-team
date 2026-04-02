@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <title>점심 주문 관리자</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #f6f0e8;
+      padding: 30px;
+    }
+    #admin-panel {
+      max-width: 1000px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    }
+    .summary-card {
+      border: 1px solid #ddd;
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 16px;
+      background: #fffaf5;
+    }
+    h2, h3, h4 {
+      margin-top: 0;
+    }
+    button {
+      padding: 10px 16px;
+      border: 0;
+      border-radius: 8px;
+      cursor: pointer;
+      margin-right: 8px;
+    }
+  </style>
+</head>
+<body>
+  <div id="admin-panel">
+    <h2>📊 주문 현황</h2>
+    <div id="order-summary"></div>
+    <button onclick="exportOrders()">Excel 다운로드</button>
+    <button onclick="resetOrders()" style="background: red; color: white;">주문 초기화</button>
+  </div>
+
+  <script>
+    const lunchSystem = {
+      menus: {
+        monday: [
+          { id: 'korean', name: '한식', maxSlots: 10 },
+          { id: 'chinese', name: '중식', maxSlots: 10 }
+        ],
+        wednesday: [
+          { id: 'japanese', name: '일식', maxSlots: 10 },
+          { id: 'western', name: '양식', maxSlots: 10 },
+          { id: 'salad', name: '샐러드', maxSlots: 10 }
+        ]
+      }
+    };
+
+    function showOrderSummary() {
+      const orders = JSON.parse(localStorage.getItem('lunchOrders') || '{}');
+      const summary = document.getElementById('order-summary');
+
+      let html = '';
+      ['monday', 'wednesday'].forEach(date => {
+        html += `<h3>${date === 'monday' ? '월요일' : '수요일'}</h3>`;
+        lunchSystem.menus[date].forEach(menu => {
+          const orderKey = `${date}-${menu.id}`;
+          const orderList = orders[orderKey] || [];
+          html += `
+            <div class="summary-card">
+              <h4>${menu.name} (${orderList.length}/${menu.maxSlots})</h4>
+              <ul>
+                ${orderList.map(order => `<li>${order.name}</li>`).join('')}
+              </ul>
+            </div>
+          `;
+        });
+      });
+
+      summary.innerHTML = html;
+    }
+
+    function resetOrders() {
+      if (confirm('정말로 모든 주문을 초기화하시겠습니까?')) {
+        localStorage.removeItem('lunchOrders');
+        location.reload();
+      }
+    }
+
+    function exportOrders() {
+      alert('엑셀 다운로드 기능은 아직 미구현');
+    }
+
+    document.addEventListener('DOMContentLoaded', showOrderSummary);
+  </script>
+</body>
+</html>
